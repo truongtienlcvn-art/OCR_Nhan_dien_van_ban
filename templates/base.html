@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+// Áp lựa chọn giao diện đã lưu NGAY LẬP TỨC, trước khi trang vẽ ra, để tránh
+// nháy sáng->tối (hoặc ngược lại) khi tải trang. Mặc định (không có gì lưu,
+// hoặc localStorage bị chặn) là giao diện SÁNG.
+(function () {
+    try {
+        if (localStorage.getItem('anpr-theme') === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+    } catch (e) { /* localStorage bị chặn (chế độ ẩn danh...) -> giữ mặc định sáng */ }
+})();
+</script>
+<title>{% block title %}ANPR Console{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<header class="topbar">
+    <div class="topbar__brand">
+        <span class="topbar__mark">◉</span>
+        <div>
+            <div class="topbar__title">ANPR Console</div>
+            <div class="topbar__subtitle">Hệ thống nhận diện biển số xe · Đề tài 13</div>
+        </div>
+    </div>
+    <div class="topbar__actions">
+        <nav class="topbar__nav">
+            <a href="{{ url_for('trang_chu') }}" class="{{ 'is-active' if request.path == '/' else '' }}">Quét biển số</a>
+            <a href="{{ url_for('trang_lich_su') }}" class="{{ 'is-active' if request.path == '/history' else '' }}">Lịch sử</a>
+        </nav>
+        <button id="themeToggle" class="theme-toggle" type="button"
+                aria-label="Chuyển giao diện sáng/tối" title="Chuyển giao diện sáng/tối">
+            <span class="theme-toggle__icon" aria-hidden="true">🌙</span>
+        </button>
+    </div>
+</header>
+
+<main class="page">
+    {% block content %}{% endblock %}
+</main>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

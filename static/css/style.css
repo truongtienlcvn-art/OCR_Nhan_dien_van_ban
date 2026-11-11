@@ -1,0 +1,545 @@
+/* =========================================================
+   Design tokens — "Trạm gác barie"
+   Chủ đề: phần mềm người trực bãi xe/trạm thu phí dùng ngay bên cạnh
+   thanh chắn (barie), đối chiếu camera với biển số thật trước khi mở
+   cổng. Vạch sọc đen-vàng của thanh chắn và kiểu chữ dập khuôn trên
+   chính biển số xe là 2 chất liệu thật của chủ đề, dùng làm điểm nhấn
+   thiết kế — không phải màu trang trí ngẫu nhiên.
+   Mặc định: nền SÁNG. Có thể bật nền tối qua nút chuyển đổi (lưu lựa
+   chọn ở localStorage, xem main.js).
+   ========================================================= */
+:root {
+    --bg: #F7F7F4;
+    --panel: #FFFFFF;
+    --panel-alt: #EEEDE7;
+    --border: #DEDCD3;
+    --text: #20242B;
+    --text-muted: #6B6E66;
+    --accent: #B9700A;       /* hổ phách đậm — đủ tương phản trên nền sáng */
+    --accent-dim: #D9A237;
+    --success: #2F8F5B;
+    --warning: #B9700A;
+    --danger: #C93B3B;
+
+    /* Asphalt — vỏ console, topbar: cố định, không đổi theo theme sáng/tối */
+    --asphalt: #23262B;
+    --asphalt-alt: #2D3038;
+
+    /* Hổ phách "đèn LED / vạch barie" cố định — dùng trong khung tối
+       (ô đọc biển số, vạch sọc cảnh báo), không đổi theo theme. */
+    --led: #FFB020;
+    --led-dim: #7A5A20;
+
+    --font-ui: 'Be Vietnam Pro', system-ui, sans-serif;
+    --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
+
+    --radius-shell: 16px;   /* bo góc cho VỎ ngoài (console, nút bấm) */
+    --radius-tight: 3px;    /* các ô "kính/màn hình" bên trong — gần như vuông, không bo tròn kiểu thẻ SaaS */
+}
+
+:root[data-theme="dark"] {
+    --bg: #14161A;
+    --panel: #1C1F25;
+    --panel-alt: #262A31;
+    --border: #363B44;
+    --text: #E9E9E4;
+    --text-muted: #9A9D97;
+    --accent: #FFB020;
+    --accent-dim: #7A5A20;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-ui);
+    -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; text-decoration: none; }
+
+/* Vạch sọc đen-vàng của thanh chắn barie — dùng làm mixin, chỉ áp vào
+   đúng 2 chỗ trong toàn bộ giao diện (viền topbar + vạch ngăn console). */
+.hazard-stripe {
+    background: repeating-linear-gradient(
+        135deg,
+        var(--led) 0px, var(--led) 10px,
+        var(--asphalt) 10px, var(--asphalt) 20px
+    );
+}
+
+/* ---------------------------------------------------------
+   Top bar — luôn là vỏ asphalt tối, bất kể theme sáng/tối của
+   phần nội dung bên dưới (giống bezel cố định của một thiết bị).
+   --------------------------------------------------------- */
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 32px;
+    background: var(--asphalt);
+    border-bottom: 4px solid transparent;
+    border-image: repeating-linear-gradient(
+        135deg,
+        var(--led) 0px, var(--led) 10px,
+        var(--asphalt-alt) 10px, var(--asphalt-alt) 20px
+    ) 1;
+}
+
+.topbar__brand { display: flex; align-items: center; gap: 12px; }
+
+.topbar__mark {
+    color: var(--led);
+    font-size: 22px;
+    line-height: 1;
+}
+
+.topbar__title {
+    font-weight: 700;
+    font-size: 17px;
+    letter-spacing: 0.3px;
+    color: #F2F2EC;
+}
+.topbar__subtitle { font-size: 12px; color: #9A9D97; margin-top: 2px; }
+
+.topbar__nav { display: flex; gap: 4px; }
+
+.topbar__actions { display: flex; align-items: center; gap: 10px; }
+
+.theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    border: 1px solid var(--asphalt-alt);
+    background: var(--asphalt-alt);
+    color: #F2F2EC;
+    cursor: pointer;
+    font-size: 15px;
+    line-height: 1;
+    transition: background 0.15s ease, transform 0.1s ease;
+}
+.theme-toggle:hover { background: #363A43; }
+.theme-toggle:active { transform: scale(0.94); }
+
+.topbar__nav a {
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #B7BAB2;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.topbar__nav a:hover { background: var(--asphalt-alt); color: #F2F2EC; }
+.topbar__nav a.is-active { background: var(--asphalt-alt); color: var(--led); }
+
+/* ---------------------------------------------------------
+   Layout
+   --------------------------------------------------------- */
+.page { max-width: 1200px; margin: 0 auto; padding: 32px 32px 64px; }
+
+.panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-shell);
+    padding: 22px;
+}
+
+.panel__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+}
+
+.panel__header h2 {
+    font-size: 13px;
+    font-weight: 700;
+    margin: 0;
+    color: var(--text-muted);
+    letter-spacing: 0.4px;
+}
+
+/* ---------------------------------------------------------
+   Trang Quét biển số — một KHỐI CONSOLE duy nhất (vỏ asphalt),
+   chứa 2 ô "kính" (camera / kết quả) ngăn nhau bằng 1 vạch sọc
+   barie dọc — thay cho 2 thẻ trắng rời rạc giống hệt nhau.
+   --------------------------------------------------------- */
+.gate-console {
+    background: var(--asphalt);
+    border-radius: var(--radius-shell);
+    padding: 3px;
+    display: grid;
+    grid-template-columns: 1.05fr 10px 1.3fr;
+}
+
+.gate-console__divider { }
+
+@media (max-width: 900px) {
+    .gate-console { grid-template-columns: 1fr; grid-template-rows: auto 10px auto; }
+}
+
+.console-pane {
+    background: var(--panel);
+    border-radius: calc(var(--radius-shell) - 3px);
+    padding: 22px;
+}
+
+.console-pane__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+.console-pane__head h2 {
+    font-size: 12px;
+    font-weight: 700;
+    margin: 0;
+    color: var(--text-muted);
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+}
+
+.dot {
+    width: 9px; height: 9px; border-radius: 50%;
+    background: var(--text-muted);
+}
+.dot--idle { background: var(--danger); }
+.dot--live { background: var(--success); box-shadow: 0 0 8px var(--success); }
+
+.camera-frame {
+    position: relative;
+    background: #05070a;
+    border-radius: var(--radius-tight);
+    overflow: hidden;
+    aspect-ratio: 4 / 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--asphalt-alt);
+}
+
+.camera-frame video { width: 100%; height: 100%; object-fit: cover; }
+
+.camera-frame__hint {
+    position: absolute;
+    bottom: 12px; left: 12px;
+    font-size: 12px;
+    color: #C7C9C2;
+    background: rgba(10, 12, 16, 0.7);
+    padding: 4px 10px;
+    border-radius: var(--radius-tight);
+}
+
+.capture-actions { display: flex; gap: 10px; margin-top: 16px; }
+
+.capture-note {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin: 14px 0 0;
+    line-height: 1.5;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 18px;
+    border-radius: 7px;
+    font-family: var(--font-ui);
+    font-size: 14px;
+    font-weight: 700;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: transform 0.1s ease, opacity 0.15s ease;
+}
+.btn:active { transform: scale(0.98); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.btn--primary { background: var(--accent); color: #221400; }
+.btn--primary:hover:not(:disabled) { opacity: 0.9; }
+
+.btn--ghost { background: transparent; border-color: var(--border); color: var(--text); }
+.btn--ghost:hover { background: var(--panel-alt); }
+
+/* Kết quả */
+.badge {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-muted);
+    background: var(--panel-alt);
+    padding: 4px 10px;
+    border-radius: var(--radius-tight);
+    border: 1px solid var(--border);
+}
+
+.plate-readout {
+    background: #05070a;
+    border: 2px solid var(--led-dim);
+    border-radius: var(--radius-tight);
+    padding: 26px 20px;
+    text-align: center;
+    margin-bottom: 18px;
+}
+
+.plate-readout__placeholder {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: #7A7D77;
+    letter-spacing: 4px;
+}
+
+.plate-readout__text {
+    font-family: var(--font-ui);
+    font-size: clamp(30px, 5.5vw, 46px);
+    font-weight: 700;
+    color: #FFFFFF;
+    letter-spacing: 1px;
+    text-shadow: 0 0 14px rgba(255, 255, 255, 0.3);
+}
+
+.plate-readout__text--empty {
+    font-family: var(--font-ui);
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--danger);
+    letter-spacing: 0.3px;
+}
+
+.confidence-row { margin-bottom: 20px; }
+
+.confidence-row__label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    font-family: var(--font-mono);
+}
+
+.confidence-bar {
+    height: 7px;
+    border-radius: 999px;
+    background: var(--panel-alt);
+    overflow: hidden;
+}
+
+.confidence-bar__fill {
+    height: 100%;
+    width: 0%;
+    background: var(--danger);
+    transition: width 0.4s ease, background 0.4s ease;
+}
+
+.image-compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+.image-compare__label {
+    display: block;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+}
+
+.image-compare__frame {
+    position: relative;
+    background: var(--panel-alt);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-tight);
+    aspect-ratio: 4 / 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.image-compare__frame img {
+    width: 100%; height: 100%; object-fit: contain;
+    display: none;
+}
+
+.image-compare__empty {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.alert {
+    margin-top: 16px;
+    padding: 10px 14px;
+    border-radius: var(--radius-tight);
+    font-size: 13px;
+}
+.alert--error { background: rgba(201, 59, 59, 0.1); color: var(--danger); border: 1px solid rgba(201, 59, 59, 0.3); }
+
+.is-hidden { display: none !important; }
+
+/* ---------------------------------------------------------
+   Trang Lịch sử
+   --------------------------------------------------------- */
+.history-page { display: flex; flex-direction: column; gap: 20px; }
+
+.filter-form {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr auto;
+    gap: 14px;
+    align-items: end;
+}
+
+@media (max-width: 760px) {
+    .filter-form { grid-template-columns: 1fr 1fr; }
+}
+
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-size: 12px; color: var(--text-muted); }
+.field input {
+    background: var(--panel-alt);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-tight);
+    padding: 9px 12px;
+    color: var(--text);
+    font-family: var(--font-ui);
+    font-size: 13px;
+}
+.field input:focus { outline: 2px solid var(--accent-dim); }
+
+.field--actions { flex-direction: row; gap: 10px; }
+
+.history-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+
+.history-table th {
+    text-align: left;
+    padding: 10px 12px;
+    color: var(--text-muted);
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    border-bottom: 2px solid var(--led);
+}
+
+.history-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+}
+
+.history-table tr:hover td { background: var(--panel-alt); }
+
+.history-table .plate-cell {
+    font-family: var(--font-ui);
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.3px;
+    color: var(--accent);
+}
+
+.thumb {
+    width: 64px; height: 40px;
+    object-fit: cover;
+    border-radius: var(--radius-tight);
+    border: 1px solid var(--border);
+    background: var(--panel-alt);
+}
+
+.table-empty { text-align: center; color: var(--text-muted); padding: 30px 0; }
+
+.link-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 6px 12px;
+    border-radius: var(--radius-tight);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.link-btn:hover { background: var(--panel-alt); }
+
+.conf-chip {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    display: inline-block;
+}
+.conf-chip--high { background: rgba(47, 143, 91, 0.15); color: var(--success); }
+.conf-chip--mid  { background: rgba(185, 112, 10, 0.15); color: var(--warning); }
+.conf-chip--low  { background: rgba(201, 59, 59, 0.15); color: var(--danger); }
+
+/* Modal */
+.modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(5, 7, 10, 0.72);
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+    z-index: 50;
+}
+
+.modal {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-shell);
+    width: 100%; max-width: 720px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal__header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--border);
+}
+.modal__header h3 { margin: 0; font-size: 15px; font-weight: 700; }
+
+.modal__close {
+    background: transparent; border: none; color: var(--text-muted);
+    font-size: 22px; cursor: pointer; line-height: 1;
+}
+.modal__close:hover { color: var(--text); }
+
+.modal__body { padding: 22px; }
+
+/* Dải ảnh các bước xử lý trong modal "Xem chi tiết" — cuộn ngang trên màn hình nhỏ,
+   mỗi bước là 1 ô ảnh + chú thích, dễ nhìn tiến trình xử lý của đúng lượt quét đó. */
+.step-strip {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    margin-bottom: 18px;
+}
+.step-strip__item {
+    flex: 0 0 150px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.step-strip__item.is-hidden { display: none; }
+.step-strip__label {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: center;
+}
+.step-strip__item img {
+    width: 150px; height: 112px; object-fit: contain;
+    background: var(--panel-alt);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-tight);
+}
+
+.modal__info { font-size: 13px; line-height: 2; }
+.modal__note { color: var(--text-muted); font-size: 12px; margin-top: 8px; }
+
+.camera-frame--dragover {
+    border-color: var(--led);
+    box-shadow: 0 0 0 3px rgba(255, 176, 32, 0.25) inset;
+}

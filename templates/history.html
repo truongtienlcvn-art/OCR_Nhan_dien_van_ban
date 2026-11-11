@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Lịch sử · ANPR Console{% endblock %}
+
+{% block content %}
+<div class="history-page">
+
+    <section class="panel filter-panel">
+        <div class="panel__header">
+            <h2>Lịch sử nhận diện</h2>
+        </div>
+        <form id="filterForm" class="filter-form">
+            <div class="field">
+                <label for="filterBienSo">Tìm theo biển số</label>
+                <input type="text" id="filterBienSo" placeholder="VD: 30A, 51F1…">
+            </div>
+            <div class="field">
+                <label for="filterTuNgay">Từ ngày</label>
+                <input type="date" id="filterTuNgay">
+            </div>
+            <div class="field">
+                <label for="filterDenNgay">Đến ngày</label>
+                <input type="date" id="filterDenNgay">
+            </div>
+            <div class="field field--actions">
+                <button type="submit" class="btn btn--primary">Lọc</button>
+                <button type="button" id="btnResetFilter" class="btn btn--ghost">Xoá lọc</button>
+            </div>
+        </form>
+    </section>
+
+    <section class="panel table-panel">
+        <table class="history-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Ảnh cắt</th>
+                    <th>Biển số</th>
+                    <th>Độ tin cậy</th>
+                    <th>Thời gian quét</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="historyTableBody">
+                <tr><td colspan="6" class="table-empty">Đang tải dữ liệu…</td></tr>
+            </tbody>
+        </table>
+    </section>
+</div>
+
+<!-- Modal xem chi tiết / đối chiếu -->
+<div class="modal-overlay is-hidden" id="detailModal">
+    <div class="modal">
+        <div class="modal__header">
+            <h3>Chi tiết lần quét #<span id="modalId"></span></h3>
+            <button class="modal__close" id="modalClose">×</button>
+        </div>
+        <div class="modal__body">
+            <div class="step-strip" id="modalStepStrip">
+                <div class="step-strip__item" id="stepItem-goc">
+                    <span class="step-strip__label">1. Ảnh gốc</span>
+                    <img id="modalStepGoc" alt="Ảnh gốc">
+                </div>
+                <div class="step-strip__item" id="stepItem-det">
+                    <span class="step-strip__label">2. YOLO khoanh vùng</span>
+                    <img id="modalStepDet" alt="Ảnh phát hiện vùng biển số">
+                </div>
+                <div class="step-strip__item" id="stepItem-crop">
+                    <span class="step-strip__label">3. Đã cắt &amp; làm thẳng</span>
+                    <img id="modalStepCrop" alt="Ảnh đã cắt">
+                </div>
+                <div class="step-strip__item" id="stepItem-char">
+                    <span class="step-strip__label">4. Tách ký tự</span>
+                    <img id="modalStepChar" alt="Ảnh tách ký tự">
+                </div>
+                <div class="step-strip__item" id="stepItem-out">
+                    <span class="step-strip__label">5. Kết quả cuối</span>
+                    <img id="modalStepOut" alt="Ảnh kết quả cuối">
+                </div>
+            </div>
+            <div class="modal__info">
+                <div><strong>Biển số AI đọc được:</strong> <span id="modalBienSo"></span></div>
+                <div><strong>Độ tin cậy:</strong> <span id="modalDoTinCay"></span></div>
+                <div><strong>Thời gian:</strong> <span id="modalThoiGian"></span></div>
+                <p class="modal__note">Đối chiếu ảnh cận cảnh với chuỗi biển số để xác nhận AI đọc đúng hay sai.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

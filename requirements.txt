@@ -1,0 +1,9 @@
+Flask>=3.0
+opencv-contrib-python>=4.8
+pytesseract>=0.3.10
+numpy>=1.24
+Pillow>=10.0
+pyodbc>=5.0
+ultralytics>=8.0
+paddlepaddle==2.6.1
+paddleocr==2.7.3

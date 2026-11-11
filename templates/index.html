@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Quét biển số · ANPR Console{% endblock %}
+
+{% block content %}
+<div class="gate-console">
+
+    <!-- CỘT TRÁI: nguồn ảnh đầu vào -->
+    <section class="console-pane capture-pane">
+        <div class="console-pane__head">
+            <h2>Nguồn ảnh</h2>
+            <span class="dot dot--idle" id="cameraStatusDot"></span>
+        </div>
+
+        <div class="camera-frame">
+            <video id="video" autoplay playsinline muted></video>
+            <canvas id="captureCanvas" class="is-hidden"></canvas>
+            <div class="camera-frame__hint" id="cameraHint">Đang kết nối camera…</div>
+        </div>
+
+        <div class="capture-actions">
+            <button id="btnCapture" class="btn btn--primary" disabled>Chụp từ camera</button>
+            <label class="btn btn--ghost" for="fileInput">Upload ảnh</label>
+            <input type="file" id="fileInput" accept="image/*" class="is-hidden">
+        </div>
+
+        <p class="capture-note">Mẹo: giữ camera cách biển số 0.5–1.5m, tránh ngược sáng để tăng độ chính xác OCR.</p>
+    </section>
+
+    <div class="gate-console__divider hazard-stripe" aria-hidden="true"></div>
+
+    <!-- CỘT PHẢI: kết quả -->
+    <section class="console-pane result-pane">
+        <div class="console-pane__head">
+            <h2>Kết quả nhận diện</h2>
+            <span class="badge" id="latencyBadge">--- ms</span>
+        </div>
+
+        <div class="plate-readout" id="plateReadout">
+            <span class="plate-readout__placeholder">CHỜ QUÉT</span>
+        </div>
+
+        <div class="confidence-row">
+            <div class="confidence-row__label">
+                <span>Độ tin cậy OCR</span>
+                <span id="confidenceValue">0%</span>
+            </div>
+            <div class="confidence-bar">
+                <div class="confidence-bar__fill" id="confidenceFill"></div>
+            </div>
+        </div>
+
+        <div class="image-compare">
+            <div class="image-compare__item">
+                <span class="image-compare__label">Ảnh đầu vào</span>
+                <div class="image-compare__frame">
+                    <img id="imgInput" alt="Ảnh đầu vào" />
+                    <span class="image-compare__empty" id="emptyInput">Chưa có ảnh</span>
+                </div>
+            </div>
+            <div class="image-compare__item">
+                <span class="image-compare__label">Ảnh đầu ra (đã khoanh vùng)</span>
+                <div class="image-compare__frame">
+                    <img id="imgOutput" alt="Ảnh đầu ra" />
+                    <span class="image-compare__empty" id="emptyOutput">Chưa có ảnh</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="scanError" class="alert alert--error is-hidden"></div>
+    </section>
+</div>
+{% endblock %}
